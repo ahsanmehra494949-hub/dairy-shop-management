@@ -28,13 +28,27 @@
 
   --shadow-card: 0 1px 2px rgba(15,23,42,0.04), 0 8px 24px -12px rgba(33,88,221,0.12);
   --shadow-cardHover: 0 4px 12px rgba(15,23,42,0.06), 0 16px 32px -12px rgba(33,88,221,0.18);
-  --shadow-sidebar: -8px 0 30px -10px rgba(15,23,42,0.08);
+  --shadow-sidebar: 8px 0 30px -10px rgba(15,23,42,0.08);
 
   --radius-xl2: 1.25rem;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Tailwind v4 removed the default gray border color (now currentColor),
+   which made every plain `border` / `border-b` / `border-t` utility render
+   as a harsh black line. Reset it to a soft neutral so borders match the
+   rest of the UI instead of looking like stray black outlines. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-slate-200, #e2e8f0);
+  }
 }
 
 html,

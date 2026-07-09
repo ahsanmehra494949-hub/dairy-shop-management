@@ -1,20 +1,26 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LuStore,
   LuUser,
   LuBell,
   LuShieldCheck,
+  LuTags,
   LuX,
+  LuPlus,
 } from "react-icons/lu";
 
 import Layout from "../components/Layout";
+import { useShop } from "../context/ShopContext";
 
 
 export default function Settings(){
 
+  const { categories, addCategory, deleteCategory } = useShop();
+
   const [saved,setSaved] = useState(false);
   const [passwordOpen,setPasswordOpen] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
 
 
   const handleSave = ()=>{
@@ -25,6 +31,12 @@ export default function Settings(){
       setSaved(false);
     },2000);
 
+  }
+
+  const handleAddCategory = (e) => {
+    e.preventDefault();
+    addCategory(newCategory);
+    setNewCategory("");
   }
 
 
@@ -107,6 +119,54 @@ export default function Settings(){
 
 
 
+          <Card
+            title="Product Categories"
+            icon={LuTags}
+          >
+
+            <p className="text-sm text-gray-500 mb-4">
+              Add categories here — they'll show up when adding a product in Inventory.
+            </p>
+
+            <form onSubmit={handleAddCategory} className="flex gap-2 mb-4">
+              <input
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                placeholder="e.g. Ice Cream"
+                className="input flex-1"
+              />
+              <button
+                type="submit"
+                className="shrink-0 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-colors"
+                aria-label="Add category"
+              >
+                <LuPlus size={18} />
+              </button>
+            </form>
+
+            <div className="flex flex-wrap gap-2">
+              {categories.length === 0 && (
+                <p className="text-xs text-ink-500">No categories yet — add your first one above.</p>
+              )}
+              {categories.map((c) => (
+                <span
+                  key={c}
+                  className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 rounded-full bg-primary-50 text-primary-700 text-sm font-medium"
+                >
+                  {c}
+                  <button
+                    onClick={() => deleteCategory(c)}
+                    className="p-0.5 rounded-full hover:bg-primary-100 transition-colors"
+                    aria-label={`Remove ${c}`}
+                  >
+                    <LuX size={13} />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+          </Card>
+
 
 
 
@@ -151,9 +211,6 @@ export default function Settings(){
 
 
 
-
-
-
           <Card
             title="Security"
             icon={LuShieldCheck}
@@ -194,8 +251,6 @@ export default function Settings(){
 
 
 
-
-
         <button
 
           onClick={handleSave}
@@ -219,11 +274,9 @@ export default function Settings(){
 
 
 
-
-
-
         {/* SUCCESS TOAST */}
 
+        <AnimatePresence>
         {
           saved && (
 
@@ -231,18 +284,26 @@ export default function Settings(){
 
               initial={{
                 opacity:0,
-                x:50
+                y:20
               }}
 
               animate={{
                 opacity:1,
-                x:0
+                y:0
+              }}
+
+              exit={{
+                opacity:0,
+                y:20
               }}
 
               className="
               fixed
-              bottom-6
-              right-6
+              bottom-24
+              sm:bottom-6
+              inset-x-4
+              sm:inset-x-auto
+              sm:right-6
               z-[200]
               bg-emerald-600
               text-white
@@ -252,6 +313,8 @@ export default function Settings(){
               shadow-xl
               flex
               items-center
+              justify-center
+              sm:justify-start
               gap-2
               font-medium
               "
@@ -264,10 +327,7 @@ export default function Settings(){
 
           )
         }
-
-
-
-
+        </AnimatePresence>
 
 
 
@@ -288,6 +348,7 @@ export default function Settings(){
               items-center
               justify-center
               z-[300]
+              px-4
               "
 
             >
@@ -411,7 +472,6 @@ function Card({title,icon:Icon,children}){
 
       className="
       bg-white
-      border
       rounded-2xl
       p-6
       shadow-card

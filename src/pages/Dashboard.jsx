@@ -17,7 +17,7 @@ export default function Dashboard() {
   const [toast, setToast] = useState(null)
 
   const handleAddProductClick = () => {
-    navigate('/products', { state: { openAdd: true } })
+    navigate('/inventory', { state: { openAdd: true } })
   }
 
   const handleSaveSale = (sale) => {
@@ -53,7 +53,7 @@ export default function Dashboard() {
         <div className="xl:col-span-2 bg-white rounded-xl2 p-5 shadow-card border border-slate-50">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-ink-900">Recent Sales</h3>
-            <button onClick={() => navigate('/sales')} className="text-xs font-medium text-primary-600 hover:text-primary-700">
+            <button onClick={() => navigate('/reports')} className="text-xs font-medium text-primary-600 hover:text-primary-700">
               View all
             </button>
           </div>
@@ -97,7 +97,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 lg:left-auto lg:right-[300px] lg:translate-x-0 bg-ink-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-cardHover flex items-center gap-2 z-50"
+            className="fixed bottom-6 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 lg:left-[300px] lg:translate-x-0 bg-ink-900 text-white text-sm font-medium px-4 py-3 rounded-xl shadow-cardHover flex items-center gap-2 z-50 justify-center sm:justify-start"
           >
             <LuCheck size={16} className="text-emerald-400" /> {toast}
           </motion.div>

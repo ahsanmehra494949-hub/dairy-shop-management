@@ -14,7 +14,7 @@ export default function Layout({ title, children }) {
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
       />
-      <div className={`transition-[margin] duration-300 ${collapsed ? 'lg:mr-[84px]' : 'lg:mr-[260px]'}`}>
+      <div className={`transition-[margin] duration-300 ${collapsed ? 'lg:ml-[84px]' : 'lg:ml-[260px]'}`}>
         <Navbar title={title} onMobileMenuClick={() => setMobileOpen(true)} />
         <main className="p-5 lg:p-8">{children}</main>
       </div>

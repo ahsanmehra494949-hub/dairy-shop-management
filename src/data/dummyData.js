@@ -36,18 +36,18 @@ export const recentSales = [
 export const categories = ['All', 'Milk', 'Yogurt', 'Cheese', 'Butter & Cream', 'Beverages']
 
 export const products = [
-  { id: 1, name: 'Full Cream Milk', category: 'Milk', price: 150, stock: 120, unit: 'Liter', image: '🥛' },
-  { id: 2, name: 'Skimmed Milk', category: 'Milk', price: 140, stock: 8, unit: 'Liter', image: '🥛' },
-  { id: 3, name: 'Greek Yogurt', category: 'Yogurt', price: 240, stock: 45, unit: 'KG', image: '🍶' },
-  { id: 4, name: 'Plain Yogurt', category: 'Yogurt', price: 180, stock: 60, unit: 'KG', image: '🍶' },
-  { id: 5, name: 'Paneer', category: 'Cheese', price: 320, stock: 5, unit: 'KG', image: '🧀' },
-  { id: 6, name: 'Cheddar Cheese', category: 'Cheese', price: 480, stock: 22, unit: 'Packet', image: '🧀' },
-  { id: 7, name: 'Salted Butter', category: 'Butter & Cream', price: 230, stock: 34, unit: 'Packet', image: '🧈' },
-  { id: 8, name: 'Fresh Cream', category: 'Butter & Cream', price: 200, stock: 6, unit: 'Liter', image: '🥛' },
-  { id: 9, name: 'Mango Lassi', category: 'Beverages', price: 90, stock: 75, unit: 'Packet', image: '🥤' },
-  { id: 10, name: 'Plain Lassi', category: 'Beverages', price: 80, stock: 3, unit: 'Packet', image: '🥤' },
-  { id: 11, name: 'Ghee', category: 'Butter & Cream', price: 950, stock: 18, unit: 'KG', image: '🧈' },
-  { id: 12, name: 'Toned Milk', category: 'Milk', price: 130, stock: 90, unit: 'Liter', image: '🥛' },
+  { id: 1, name: 'Full Cream Milk', category: 'Milk', price: 150, stock: 120, unit: 'Liter', icon: 'milk' },
+  { id: 2, name: 'Skimmed Milk', category: 'Milk', price: 140, stock: 8, unit: 'Liter', icon: 'milk' },
+  { id: 3, name: 'Greek Yogurt', category: 'Yogurt', price: 240, stock: 45, unit: 'KG', icon: 'yogurt' },
+  { id: 4, name: 'Plain Yogurt', category: 'Yogurt', price: 180, stock: 60, unit: 'KG', icon: 'yogurt' },
+  { id: 5, name: 'Paneer', category: 'Cheese', price: 320, stock: 5, unit: 'KG', icon: 'cheese' },
+  { id: 6, name: 'Cheddar Cheese', category: 'Cheese', price: 480, stock: 22, unit: 'Packet', icon: 'cheese' },
+  { id: 7, name: 'Salted Butter', category: 'Butter & Cream', price: 230, stock: 34, unit: 'Packet', icon: 'butter' },
+  { id: 8, name: 'Fresh Cream', category: 'Butter & Cream', price: 200, stock: 6, unit: 'Liter', icon: 'cream' },
+  { id: 9, name: 'Mango Lassi', category: 'Beverages', price: 90, stock: 75, unit: 'Packet', icon: 'beverage' },
+  { id: 10, name: 'Plain Lassi', category: 'Beverages', price: 80, stock: 3, unit: 'Packet', icon: 'beverage' },
+  { id: 11, name: 'Ghee', category: 'Butter & Cream', price: 950, stock: 18, unit: 'KG', icon: 'butter' },
+  { id: 12, name: 'Toned Milk', category: 'Milk', price: 130, stock: 90, unit: 'Liter', icon: 'milk' },
 ]
 
 export function getStockStatus(stock) {

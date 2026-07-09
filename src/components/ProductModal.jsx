@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LuX } from 'react-icons/lu'
-import { categories } from '../data/dummyData'
+import { PRODUCT_ICONS, defaultIconForCategory } from './ProductIcon'
 
-const emptyForm = { name: '', category: 'Milk', price: '', stock: '', unit: 'Liter' }
+const emptyForm = { name: '', category: '', price: '', stock: '', unit: 'Liter', icon: 'package' }
 
-export default function ProductModal({ open, onClose, onSave, initialData }) {
+export default function ProductModal({ open, onClose, onSave, initialData, categories = [] }) {
   const [form, setForm] = useState(emptyForm)
 
   useEffect(() => {
@@ -16,17 +16,30 @@ export default function ProductModal({ open, onClose, onSave, initialData }) {
         price: initialData.price,
         stock: initialData.stock,
         unit: initialData.unit,
+        icon: initialData.icon || 'package',
       })
     } else {
-      setForm(emptyForm)
+      setForm({ ...emptyForm, category: categories[0] || '' })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData, open])
 
-  const handleChange = (key) => (e) => setForm({ ...form, [key]: e.target.value })
+  const handleChange = (key) => (e) => {
+    const value = e.target.value
+    setForm((prev) => {
+      const next = { ...prev, [key]: value }
+      // When category changes (and user hasn't manually picked a custom icon
+      // for a brand new product), suggest a matching icon automatically.
+      if (key === 'category' && !initialData) {
+        next.icon = defaultIconForCategory(value)
+      }
+      return next
+    })
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!form.name || !form.price || !form.stock) return
+    if (!form.name || !form.price || !form.stock || !form.category) return
     onSave({ ...form, price: Number(form.price), stock: Number(form.stock) })
   }
 
@@ -46,7 +59,7 @@ export default function ProductModal({ open, onClose, onSave, initialData }) {
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ type: 'spring', stiffness: 300, damping: 26 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-md p-6"
+            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-md p-6 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-display font-semibold text-ink-900">
@@ -68,12 +81,38 @@ export default function ProductModal({ open, onClose, onSave, initialData }) {
                 />
               </Field>
 
-              <Field label="Category">
-                <select value={form.category} onChange={handleChange('category')} className="input">
-                  {categories.filter((c) => c !== 'All').map((c) => (
-                    <option key={c} value={c}>{c}</option>
+              <Field label="Product Icon">
+                <div className="grid grid-cols-7 gap-2">
+                  {PRODUCT_ICONS.map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      title={label}
+                      onClick={() => setForm((prev) => ({ ...prev, icon: id }))}
+                      className={`aspect-square rounded-xl flex items-center justify-center transition-colors ${
+                        form.icon === id
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-slate-50 text-ink-500 hover:bg-primary-50 hover:text-primary-600'
+                      }`}
+                    >
+                      <Icon size={17} />
+                    </button>
                   ))}
-                </select>
+                </div>
+              </Field>
+
+              <Field label="Category">
+                {categories.length > 0 ? (
+                  <select value={form.category} onChange={handleChange('category')} className="input">
+                    {categories.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-xs text-ink-500 bg-slate-50 rounded-xl px-4 py-3">
+                    No categories yet — add one from Settings → Categories first.
+                  </p>
+                )}
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
@@ -119,7 +158,8 @@ export default function ProductModal({ open, onClose, onSave, initialData }) {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+                  disabled={categories.length === 0}
+                  className="flex-1 py-2.5 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Save
                 </button>

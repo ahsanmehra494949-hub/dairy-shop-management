@@ -1,9 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
-import Products from "./pages/Products";
-import Sales from "./pages/Sales";
-import Stock from "./pages/Stock";
+import Inventory from "./pages/Inventory";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
@@ -19,24 +17,10 @@ export default function App() {
       />
 
 
-      {/* Products */}
+      {/* Inventory (products + stock, combined) */}
       <Route
-        path="/products"
-        element={<Products />}
-      />
-
-
-      {/* Sales */}
-      <Route
-        path="/sales"
-        element={<Sales />}
-      />
-
-
-      {/* Stock */}
-      <Route
-        path="/stock"
-        element={<Stock />}
+        path="/inventory"
+        element={<Inventory />}
       />
 
 
