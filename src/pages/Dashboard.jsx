@@ -36,7 +36,7 @@ export default function Dashboard() {
         <SummaryCard label="Low Stock Products" value={summaryStats.lowStockProducts} icon={LuTriangleAlert} tone="danger" />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-6">
+      <div className="grid grid-cols-1 gap-5 mt-6">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="bg-white rounded-xl2 p-5 shadow-card border border-slate-50">
           <h3 className="font-semibold text-ink-900 mb-1">Sales Overview</h3>
           <p className="text-xs text-ink-500 mb-2">This week's daily sales trend</p>

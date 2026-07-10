@@ -53,3 +53,46 @@ export const products = [
 export function getStockStatus(stock) {
   return stock <= 10 ? 'Low Stock' : 'In Stock'
 }
+
+export const customers = [
+  {
+    id: 1,
+    name: 'Ali Khan',
+    email: 'ali.khan@example.com',
+    phone: '0300-1234567',
+    address: 'Shop 12, Main Market, Lahore',
+    orders: 12,
+    total: 25000,
+    status: 'Active',
+    invoices: [
+      { id: 101, type: 'paid', amount: 5000, description: 'Milk & Yogurt supply', date: '05 Jul 2026' },
+      { id: 102, type: 'udhaar', amount: 2000, description: 'Cheese order', date: '08 Jul 2026' },
+    ],
+  },
+  {
+    id: 2,
+    name: 'Ahmed Raza',
+    email: 'ahmed.raza@example.com',
+    phone: '0312-9876543',
+    address: 'House 45, Model Town, Lahore',
+    orders: 8,
+    total: 14500,
+    status: 'Active',
+    invoices: [
+      { id: 103, type: 'paid', amount: 3200, description: 'Weekly milk supply', date: '03 Jul 2026' },
+    ],
+  },
+  {
+    id: 3,
+    name: 'Sara Ahmed',
+    email: 'sara.ahmed@example.com',
+    phone: '0321-5556789',
+    address: 'Flat 3B, Gulberg, Lahore',
+    orders: 5,
+    total: 8900,
+    status: 'Inactive',
+    invoices: [
+      { id: 104, type: 'udhaar', amount: 1500, description: 'Butter & cream order', date: '01 Jul 2026' },
+    ],
+  },
+]

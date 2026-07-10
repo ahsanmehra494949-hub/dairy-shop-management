@@ -57,3 +57,17 @@ export function WeeklySalesChart({ data }) {
     </ResponsiveContainer>
   )
 }
+
+export function ReportsTrendChart({ data }) {
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+        <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Amount']} />
+        <Bar dataKey="amount" fill="#2158dd" radius={[8, 8, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}

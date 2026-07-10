@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react'
-import { products as initialProducts, recentSales as initialSales, categories as initialCategories } from '../data/dummyData'
+import { products as initialProducts, recentSales as initialSales, categories as initialCategories, customers as initialCustomers } from '../data/dummyData'
 
 const ShopContext = createContext(null)
 
@@ -7,6 +7,7 @@ export function ShopProvider({ children }) {
   const [products, setProducts] = useState(initialProducts)
   const [recentSales, setRecentSales] = useState(initialSales)
   const [categories, setCategories] = useState(initialCategories.filter((c) => c !== 'All'))
+  const [customers, setCustomers] = useState(initialCustomers)
 
   const addProduct = (product) => {
     setProducts((prev) => [{ id: Date.now(), icon: 'package', ...product }, ...prev])
@@ -50,6 +51,51 @@ export function ShopProvider({ children }) {
     setCategories((prev) => prev.filter((c) => c !== name))
   }
 
+  // ---- Customers ----
+  const addCustomer = (customer) => {
+    setCustomers((prev) => [
+      {
+        id: Date.now(),
+        orders: 0,
+        total: 0,
+        status: 'Active',
+        invoices: [],
+        ...customer,
+      },
+      ...prev,
+    ])
+  }
+
+  const changeCustomerStatus = (id) => {
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status: c.status === 'Active' ? 'Inactive' : 'Active' } : c))
+    )
+  }
+
+  const getCustomer = (id) => customers.find((c) => String(c.id) === String(id))
+
+  // Adds an invoice (Paid or Credit) to a customer's profile, and updates their orders/total.
+  const addInvoice = (customerId, invoice) => {
+    const newInvoice = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      ...invoice,
+    }
+    setCustomers((prev) =>
+      prev.map((c) =>
+        c.id === customerId
+          ? {
+              ...c,
+              orders: c.orders + 1,
+              total: c.total + Number(invoice.amount || 0),
+              invoices: [newInvoice, ...(c.invoices || [])],
+            }
+          : c
+      )
+    )
+    return newInvoice
+  }
+
   return (
     <ShopContext.Provider
       value={{
@@ -63,6 +109,11 @@ export function ShopProvider({ children }) {
         categories,
         addCategory,
         deleteCategory,
+        customers,
+        addCustomer,
+        changeCustomerStatus,
+        getCustomer,
+        addInvoice,
       }}
     >
       {children}

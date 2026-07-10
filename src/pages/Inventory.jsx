@@ -6,11 +6,9 @@ import ProductModal from '../components/ProductModal'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
 import StockAdjustModal from '../components/StockAdjustModal'
 import ProductIcon from '../components/ProductIcon'
-import { EmptyState, Pagination } from '../components/ProductsExtras'
+import { EmptyState } from '../components/ProductsExtras'
 import { getStockStatus } from '../data/dummyData'
 import { useShop } from '../context/ShopContext'
-
-const PAGE_SIZE = 6
 
 export default function Inventory() {
   const { products, addProduct, updateProduct, deleteProduct, adjustStock, categories } = useShop()
@@ -19,7 +17,6 @@ export default function Inventory() {
 
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
-  const [page, setPage] = useState(1)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -43,8 +40,7 @@ export default function Inventory() {
     })
   }, [products, search, category])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const paginated = filtered
 
   const openAddModal = () => {
     setEditingProduct(null)
@@ -83,7 +79,7 @@ export default function Inventory() {
             <LuSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300" size={17} />
             <input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Search products..."
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 focus:bg-white transition-all"
             />
@@ -91,7 +87,7 @@ export default function Inventory() {
 
           <select
             value={category}
-            onChange={(e) => { setCategory(e.target.value); setPage(1) }}
+            onChange={(e) => setCategory(e.target.value)}
             className="px-4 py-2.5 rounded-xl bg-slate-50 text-sm text-ink-700 focus:outline-none focus:ring-2 focus:ring-primary-200"
           >
             <option value="All">All</option>
@@ -179,7 +175,6 @@ export default function Inventory() {
                 </tbody>
               </table>
             </div>
-            <Pagination page={page} totalPages={totalPages} setPage={setPage} />
           </>
         )}
       </div>

@@ -35,7 +35,9 @@ export default function Settings(){
 
   const handleAddCategory = (e) => {
     e.preventDefault();
-    addCategory(newCategory);
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    addCategory(trimmed);
     setNewCategory("");
   }
 
@@ -137,7 +139,8 @@ export default function Settings(){
               />
               <button
                 type="submit"
-                className="shrink-0 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-colors"
+                disabled={!newCategory.trim()}
+                className="shrink-0 px-4 rounded-xl bg-primary-600 hover:bg-primary-700 text-white flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label="Add category"
               >
                 <LuPlus size={18} />

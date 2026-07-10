@@ -1,6 +1,35 @@
-import { LuSearch, LuBell, LuMenu } from 'react-icons/lu'
+import { useEffect, useRef, useState } from 'react'
+import { LuSearch, LuBell, LuMenu, LuTriangleAlert, LuPackageX } from 'react-icons/lu'
+import { useShop } from '../context/ShopContext'
+import AdminProfileModal from './AdminProfileModal'
 
 export default function Navbar({ title, onMobileMenuClick }) {
+  const { products } = useShop()
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const notifRef = useRef(null)
+
+  // Build live low-stock / out-of-stock notifications straight from current inventory.
+  const notifications = products
+    .filter((p) => p.stock <= 10)
+    .sort((a, b) => a.stock - b.stock)
+    .map((p) => ({
+      id: p.id,
+      outOfStock: p.stock === 0,
+      title: p.stock === 0 ? `${p.name} is Out of Stock` : `${p.name} — Low Stock`,
+      detail: p.stock === 0 ? 'No quantity remaining' : `Only ${p.stock} ${p.unit} left`,
+    }))
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
     <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-100">
       <div className="flex items-center justify-between gap-4 px-5 lg:px-8 py-4">
@@ -26,16 +55,58 @@ export default function Navbar({ title, onMobileMenuClick }) {
 
         <div className="flex items-center gap-3">
           {/* Notification Icon */}
-          <button
-            className="relative p-2.5 rounded-xl hover:bg-slate-50 transition-colors"
-            aria-label="Notifications"
-          >
-            <LuBell size={19} className="text-ink-700" />
-            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary-600" />
-          </button>
+          <div className="relative" ref={notifRef}>
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              className="relative p-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+              aria-label="Notifications"
+            >
+              <LuBell size={19} className="text-ink-700" />
+              {notifications.length > 0 && (
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500" />
+              )}
+            </button>
+
+            {notifOpen && (
+              <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white rounded-xl2 shadow-cardHover border border-slate-100 z-50">
+                <div className="p-4 border-b border-slate-100">
+                  <p className="font-semibold text-ink-900 text-sm">Stock Notifications</p>
+                </div>
+                {notifications.length === 0 ? (
+                  <p className="p-5 text-sm text-ink-500 text-center">
+                    All products are well stocked.
+                  </p>
+                ) : (
+                  <ul>
+                    {notifications.map((n) => (
+                      <li
+                        key={n.id}
+                        className="flex items-start gap-3 p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/60"
+                      >
+                        <span
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            n.outOfStock ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'
+                          }`}
+                        >
+                          {n.outOfStock ? <LuPackageX size={16} /> : <LuTriangleAlert size={16} />}
+                        </span>
+                        <div>
+                          <p className="text-sm font-medium text-ink-900">{n.title}</p>
+                          <p className="text-xs text-ink-500">{n.detail}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* User Profile */}
-          <div className="flex items-center gap-2.5 pl-3 border-l border-slate-100">
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center gap-2.5 pl-3 border-l border-slate-100 hover:opacity-80 transition-opacity"
+          >
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold">
               A
             </div>
@@ -43,9 +114,11 @@ export default function Navbar({ title, onMobileMenuClick }) {
               <p className="text-sm font-medium text-ink-900 leading-tight">Admin User</p>
               <p className="text-xs text-ink-500 leading-tight">Shop Admin</p>
             </div>
-          </div>
+          </button>
         </div>
       </div>
+
+      <AdminProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
     </header>
   )
 }
