@@ -58,10 +58,10 @@ export default function Navbar({ title, onMobileMenuClick }) {
           />
         </div>
 
-        {/* Right Side: Bell and Profile Actions - Perfectly Centered Row */}
+        {/* Right Side: Bell and Profile Actions */}
         <div className="flex items-center gap-3 h-10">
           
-          {/* Notification Icon */}
+          {/* Notification Icon Component */}
           <div className="relative flex items-center h-full" ref={notifRef}>
             <button
               onClick={() => setNotifOpen((v) => !v)}
@@ -74,9 +74,18 @@ export default function Navbar({ title, onMobileMenuClick }) {
               )}
             </button>
 
-            {/* Dropdown position adjusted relative to the row */}
+            {/* FIXED DROPDOWN POSITION FOR MOBILE AND DESKTOP */}
             {notifOpen && (
-              <div className="absolute right-0 top-[48px] w-80 max-h-96 overflow-y-auto bg-white rounded-xl shadow-cardHover border border-slate-100 z-50">
+              <div 
+                className="fixed sm:absolute bg-white rounded-2xl shadow-xl border border-slate-100 z-50 max-h-96 overflow-y-auto"
+                style={{
+                  // Mobile view overrides to perfectly center the box on screen bounds
+                  left: window.innerWidth < 640 ? '16px' : 'auto',
+                  right: window.innerWidth < 640 ? '16px' : '0px',
+                  top: window.innerWidth < 640 ? '70px' : '48px',
+                  width: window.innerWidth < 640 ? 'calc(100vw - 32px)' : '320px'
+                }}
+              >
                 <div className="p-4 border-b border-slate-100">
                   <p className="font-semibold text-ink-900 text-sm">Stock Notifications</p>
                 </div>
@@ -110,7 +119,7 @@ export default function Navbar({ title, onMobileMenuClick }) {
             )}
           </div>
 
-          {/* User Profile - FIXED: Centered vertically, no longer sticking to the top */}
+          {/* User Profile */}
           <div className="flex items-center h-full pl-3 border-l border-slate-100">
             <button
               onClick={() => setProfileOpen(true)}
@@ -121,7 +130,7 @@ export default function Navbar({ title, onMobileMenuClick }) {
                 A
               </div>
               
-              {/* Admin Name Details - Perfectly aligned inside the flex row */}
+              {/* Admin Name Details */}
               <div className="hidden sm:flex flex-col items-start justify-center text-left">
                 <p className="text-sm font-semibold text-ink-900 leading-none mb-1">
                   Admin User
