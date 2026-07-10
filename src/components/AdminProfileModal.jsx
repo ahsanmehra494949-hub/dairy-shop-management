@@ -5,8 +5,9 @@ export default function AdminProfileModal({ open, onClose }) {
   return (
     <AnimatePresence>
       {open && (
+        /* FIXED: Added fixed top-0 left-0 w-full h-full to force it to break out of any parent containers and align to the screen viewport */
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm px-4"
+          className="fixed top-0 left-0 w-full h-full z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm px-4 py-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -18,7 +19,7 @@ export default function AdminProfileModal({ open, onClose }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-sm max-h-[85vh] overflow-y-auto p-6"
+            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-sm max-h-[90vh] overflow-y-auto p-6 my-auto"
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-display font-semibold text-ink-900">Admin Profile</h3>

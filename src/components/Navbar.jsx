@@ -33,17 +33,22 @@ export default function Navbar({ title, onMobileMenuClick }) {
   return (
     <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-slate-100">
       <div className="flex items-center justify-between gap-4 px-5 lg:px-8 py-4">
-        <div className="flex items-center gap-3">
+        
+        {/* Left Side: Menu and Title Perfectly Centered */}
+        <div className="flex items-center gap-3 h-10">
           <button
             onClick={onMobileMenuClick}
-            className="lg:hidden p-2 rounded-lg text-ink-700 hover:bg-slate-50"
+            className="lg:hidden p-2 rounded-lg text-ink-700 hover:bg-slate-50 flex items-center justify-center shrink-0"
             aria-label="Open menu"
           >
             <LuMenu size={20} />
           </button>
-          <h1 className="text-xl font-semibold text-ink-900">{title}</h1>
+          <h1 className="text-xl font-semibold text-ink-900 leading-none self-center">
+            {title}
+          </h1>
         </div>
 
+        {/* Center Search Bar */}
         <div className="hidden md:flex items-center flex-1 max-w-sm relative">
           <LuSearch className="absolute left-3.5 text-ink-300" size={17} />
           <input
@@ -53,12 +58,14 @@ export default function Navbar({ title, onMobileMenuClick }) {
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Right Side: Bell and Profile Actions - Perfectly Centered Row */}
+        <div className="flex items-center gap-3 h-10">
+          
           {/* Notification Icon */}
-          <div className="relative" ref={notifRef}>
+          <div className="relative flex items-center h-full" ref={notifRef}>
             <button
               onClick={() => setNotifOpen((v) => !v)}
-              className="relative p-2.5 rounded-xl hover:bg-slate-50 transition-colors"
+              className="relative p-2.5 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center shrink-0"
               aria-label="Notifications"
             >
               <LuBell size={19} className="text-ink-700" />
@@ -67,8 +74,9 @@ export default function Navbar({ title, onMobileMenuClick }) {
               )}
             </button>
 
+            {/* Dropdown position adjusted relative to the row */}
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto bg-white rounded-xl2 shadow-cardHover border border-slate-100 z-50">
+              <div className="absolute right-0 top-[48px] w-80 max-h-96 overflow-y-auto bg-white rounded-xl shadow-cardHover border border-slate-100 z-50">
                 <div className="p-4 border-b border-slate-100">
                   <p className="font-semibold text-ink-900 text-sm">Stock Notifications</p>
                 </div>
@@ -102,19 +110,29 @@ export default function Navbar({ title, onMobileMenuClick }) {
             )}
           </div>
 
-          {/* User Profile */}
-          <button
-            onClick={() => setProfileOpen(true)}
-            className="flex items-center gap-2.5 pl-3 border-l border-slate-100 hover:opacity-80 transition-opacity"
-          >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold">
-              A
-            </div>
-            <div className="hidden sm:block text-left">
-              <p className="text-sm font-medium text-ink-900 leading-tight">Admin User</p>
-              <p className="text-xs text-ink-500 leading-tight">Shop Admin</p>
-            </div>
-          </button>
+          {/* User Profile - FIXED: Centered vertically, no longer sticking to the top */}
+          <div className="flex items-center h-full pl-3 border-l border-slate-100">
+            <button
+              onClick={() => setProfileOpen(true)}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity h-full"
+            >
+              {/* Rounded Avatar Circle */}
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                A
+              </div>
+              
+              {/* Admin Name Details - Perfectly aligned inside the flex row */}
+              <div className="hidden sm:flex flex-col items-start justify-center text-left">
+                <p className="text-sm font-semibold text-ink-900 leading-none mb-1">
+                  Admin User
+                </p>
+                <p className="text-xs text-ink-500 leading-none">
+                  Shop Admin
+                </p>
+              </div>
+            </button>
+          </div>
+          
         </div>
       </div>
 
