@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LuX } from "react-icons/lu";
 
 const emptyForm = { name: "", email: "", phone: "", address: "" };
 
-export default function CustomerModal({ open, onClose, onSave }) {
+export default function CustomerModal({ open, onClose, onSave, initialData }) {
   const [form, setForm] = useState(emptyForm);
+
+  useEffect(() => {
+    if (open) {
+      setForm(
+        initialData
+          ? { name: initialData.name || "", email: initialData.email || "", phone: initialData.phone || "", address: initialData.address || "" }
+          : emptyForm
+      );
+    }
+  }, [open, initialData]);
 
   const handleChange = (key) => (e) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -26,20 +36,21 @@ export default function CustomerModal({ open, onClose, onSave }) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4"
+          className="fixed inset-0 bg-black/40 z-50 overflow-y-auto text-center px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
+          <span className="inline-block h-full align-middle" aria-hidden="true">&#8203;</span>
           <motion.div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-2xl p-6 w-full max-w-md inline-block align-middle text-left my-8 mx-auto"
             initial={{ scale: 0.9 }}
             animate={{ scale: 1 }}
           >
             <div className="flex justify-between mb-5">
-              <h2 className="text-xl font-bold">Add Customer</h2>
+              <h2 className="text-xl font-bold">{initialData ? "Edit Customer" : "Add Customer"}</h2>
               <button onClick={onClose}>
                 <LuX />
               </button>
@@ -90,7 +101,7 @@ export default function CustomerModal({ open, onClose, onSave }) {
               </div>
 
               <button className="w-full bg-primary-600 text-white py-3 rounded-xl">
-                Save Customer
+                {initialData ? "Save Changes" : "Save Customer"}
               </button>
             </form>
           </motion.div>

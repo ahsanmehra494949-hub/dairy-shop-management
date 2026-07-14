@@ -17,6 +17,7 @@ export default function Inventory() {
 
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
+  const [stockFilter, setStockFilter] = useState('All')
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -36,9 +37,10 @@ export default function Inventory() {
     return products.filter((p) => {
       const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase())
       const matchesCategory = category === 'All' || p.category === category
-      return matchesSearch && matchesCategory
+      const matchesStock = stockFilter === 'All' || getStockStatus(p.stock) === stockFilter
+      return matchesSearch && matchesCategory && matchesStock
     })
-  }, [products, search, category])
+  }, [products, search, category, stockFilter])
 
   const paginated = filtered
 
@@ -104,6 +106,23 @@ export default function Inventory() {
           </button>
         </div>
 
+        {/* Stock status filter — same name is used for the active filter pill */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {['All', 'In Stock', 'Low Stock', 'Out of Stock'].map((tier) => (
+            <button
+              key={tier}
+              onClick={() => setStockFilter(tier)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
+                stockFilter === tier
+                  ? 'bg-primary-600 border-primary-600 text-white'
+                  : 'border-slate-200 text-ink-700 hover:bg-slate-50'
+              }`}
+            >
+              {tier}
+            </button>
+          ))}
+        </div>
+
         {paginated.length === 0 ? (
           <EmptyState onAddProduct={openAddModal} />
         ) : (
@@ -117,13 +136,11 @@ export default function Inventory() {
                     <th className="py-3 pr-4 font-medium">Price</th>
                     <th className="py-3 pr-4 font-medium">Stock</th>
                     <th className="py-3 pr-4 font-medium">Unit</th>
-                    <th className="py-3 pr-4 font-medium">Status</th>
-                    <th className="py-3 pr-4 font-medium text-right">Actions</th>
+                    <th className="py-3 pr-4 font-medium text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginated.map((p) => {
-                    const status = getStockStatus(p.stock)
                     return (
                       <tr key={p.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/60 transition-colors">
                         <td className="py-3 pr-4">
@@ -137,14 +154,7 @@ export default function Inventory() {
                         <td className="py-3 pr-4 text-ink-700 whitespace-nowrap">{p.stock}</td>
                         <td className="py-3 pr-4 text-ink-700 whitespace-nowrap">{p.unit}</td>
                         <td className="py-3 pr-4">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                            status === 'Low Stock' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
-                          }`}>
-                            {status}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4">
-                          <div className="flex items-center justify-end gap-1.5">
+                          <div className="flex items-center justify-center gap-1.5">
                             <button
                               onClick={() => setStockTarget(p)}
                               className="p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"

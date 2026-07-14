@@ -287,7 +287,7 @@ export default function Settings(){
 
               initial={{
                 opacity:0,
-                y:20
+                y:-20
               }}
 
               animate={{
@@ -297,13 +297,13 @@ export default function Settings(){
 
               exit={{
                 opacity:0,
-                y:20
+                y:-20
               }}
 
               className="
               fixed
-              bottom-24
-              sm:bottom-6
+              top-20
+              sm:top-6
               inset-x-4
               sm:inset-x-auto
               sm:right-6

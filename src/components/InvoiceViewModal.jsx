@@ -10,19 +10,20 @@ export default function InvoiceViewModal({ open, onClose, invoice, customer }) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/40 backdrop-blur-sm px-4"
+          className="fixed inset-0 z-50 bg-ink-900/40 backdrop-blur-sm overflow-y-auto text-center px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
+          <span className="inline-block h-full align-middle" aria-hidden="true">&#8203;</span>
           <motion.div
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-md p-6 print:shadow-none"
+            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-md inline-block align-middle text-left my-8 mx-auto p-6 print:shadow-none"
           >
             <div className="flex items-center justify-between mb-5 print:hidden">
               <h3 className="text-lg font-display font-semibold text-ink-900">Invoice</h3>

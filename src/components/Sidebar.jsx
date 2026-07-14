@@ -8,11 +8,15 @@ import {
   LuSettings,
   LuChevronRight,
   LuX,
+  LuShoppingCart,
+  LuReceipt,
 } from 'react-icons/lu'
 
 const menuItems = [
   { to: '/', label: 'Dashboard', icon: LuLayoutDashboard, end: true },
+  { to: '/pos', label: 'Point of Sale', icon: LuShoppingCart },
   { to: '/inventory', label: 'Inventory', icon: LuPackageSearch },
+  { to: '/invoices', label: 'Invoices', icon: LuReceipt },
   { to: '/customers', label: 'Customers', icon: LuUsers },
   { to: '/reports', label: 'Reports', icon: LuFileChartColumn },
   { to: '/settings', label: 'Settings', icon: LuSettings },
@@ -38,12 +42,12 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       <motion.aside
         animate={{ width: collapsed ? 84 : 260 }}
         transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-        className="hidden lg:flex fixed left-0 top-0 h-screen bg-white border-r border-slate-100 shadow-sidebar z-20 flex-col"
+        className="hidden lg:flex fixed left-0 top-0 h-screen bg-white border-r border-slate-100 shadow-sidebar z-30 flex-col"
       >
         <SidebarContent collapsed={collapsed} />
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-8 w-6 h-6 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-card hover:bg-primary-700 transition-colors"
+          className="absolute -right-3 top-8 z-40 w-6 h-6 rounded-full bg-primary-600 text-white flex items-center justify-center shadow-card hover:bg-primary-700 transition-colors"
           aria-label="Toggle sidebar"
         >
           <motion.span animate={{ rotate: collapsed ? 0 : 180 }} transition={{ duration: 0.3 }}>

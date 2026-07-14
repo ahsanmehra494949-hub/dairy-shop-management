@@ -51,7 +51,9 @@ export const products = [
 ]
 
 export function getStockStatus(stock) {
-  return stock <= 10 ? 'Low Stock' : 'In Stock'
+  if (stock <= 0) return 'Out of Stock'
+  if (stock <= 10) return 'Low Stock'
+  return 'In Stock'
 }
 
 export const customers = [

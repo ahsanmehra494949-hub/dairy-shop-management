@@ -1,11 +1,14 @@
 import { Routes, Route } from "react-router-dom";
 
 import Dashboard from "./pages/Dashboard";
+import POS from "./pages/POS";
 import Inventory from "./pages/Inventory";
+import Invoices from "./pages/Invoices";
 import Customers from "./pages/Customers";
 import CustomerProfile from "./pages/CustomerProfile";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 
 export default function App() {
   return (
@@ -18,10 +21,24 @@ export default function App() {
       />
 
 
+      {/* Point of Sale */}
+      <Route
+        path="/pos"
+        element={<POS />}
+      />
+
+
       {/* Inventory (products + stock, combined) */}
       <Route
         path="/inventory"
         element={<Inventory />}
+      />
+
+
+      {/* Invoices */}
+      <Route
+        path="/invoices"
+        element={<Invoices />}
       />
 
 
@@ -49,6 +66,12 @@ export default function App() {
       <Route
         path="/settings"
         element={<Settings />}
+      />
+
+      {/* Profile */}
+      <Route
+        path="/profile"
+        element={<Profile />}
       />
 
 

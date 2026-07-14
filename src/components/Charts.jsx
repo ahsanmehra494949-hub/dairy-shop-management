@@ -20,7 +20,7 @@ const tooltipStyle = {
 export function SalesOverviewChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+      <LineChart data={data} margin={{ top: 10, right: 10, left: 4, bottom: 0 }}>
         <defs>
           <linearGradient id="lineGlow" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#2f74f5" />
@@ -29,7 +29,7 @@ export function SalesOverviewChart({ data }) {
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
         <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Sales']} />
         <Line
           type="monotone"
@@ -47,10 +47,10 @@ export function SalesOverviewChart({ data }) {
 export function WeeklySalesChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 10, right: 10, left: 4, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
         <XAxis dataKey="week" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Sales']} />
         <Bar dataKey="sales" fill="#589cff" radius={[8, 8, 0, 0]} />
       </BarChart>
@@ -61,10 +61,10 @@ export function WeeklySalesChart({ data }) {
 export function ReportsTrendChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+      <BarChart data={data} margin={{ top: 10, right: 10, left: 4, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
         <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Amount']} />
         <Bar dataKey="amount" fill="#2158dd" radius={[8, 8, 0, 0]} />
       </BarChart>

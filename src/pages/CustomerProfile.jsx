@@ -9,21 +9,25 @@ import {
   LuPlus,
   LuReceipt,
   LuEye,
+  LuWallet,
 } from 'react-icons/lu'
 import Layout from '../components/Layout'
 import InvoiceModal from '../components/InvoiceModal'
 import InvoiceViewModal from '../components/InvoiceViewModal'
+import AmountEntryModal from '../components/AmountEntryModal'
 import { useShop } from '../context/ShopContext'
 
 export default function CustomerProfile() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { getCustomer, addInvoice } = useShop()
+  const { getCustomer, addInvoice, receivePayment } = useShop()
   const customer = getCustomer(id)
 
   const [activeTab, setActiveTab] = useState('udhaar')
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false)
   const [viewingInvoice, setViewingInvoice] = useState(null)
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false)
+  const [balanceModalOpen, setBalanceModalOpen] = useState(false)
 
   if (!customer) {
     return (
@@ -42,17 +46,34 @@ export default function CustomerProfile() {
   }
 
   const invoices = customer.invoices || []
+  const payments = customer.payments || []
   const paidInvoices = invoices.filter((i) => i.type === 'paid')
   const udhaarInvoices = invoices.filter((i) => i.type === 'udhaar')
   const activeInvoices = activeTab === 'paid' ? paidInvoices : udhaarInvoices
 
   const paidTotal = paidInvoices.reduce((sum, i) => sum + Number(i.amount), 0)
   const udhaarTotal = udhaarInvoices.reduce((sum, i) => sum + Number(i.amount), 0)
+  const paymentsTotal = payments.reduce((sum, p) => sum + Number(p.amount), 0)
+
+  const invoicedTotal = paidTotal + udhaarTotal
+  const receivedTotal = paidTotal + paymentsTotal
+  const outstanding = Math.max(0, udhaarTotal - paymentsTotal)
 
   const handleSaveInvoice = (form) => {
     addInvoice(customer.id, form)
     setInvoiceModalOpen(false)
     setActiveTab(form.type)
+  }
+
+  const handleReceivePayment = ({ amount, note }) => {
+    receivePayment(customer.id, amount, note)
+    setPaymentModalOpen(false)
+  }
+
+  const handleAddBalance = ({ amount, note }) => {
+    addInvoice(customer.id, { type: 'udhaar', amount, description: note || 'Previous Balance' })
+    setBalanceModalOpen(false)
+    setActiveTab('udhaar')
   }
 
   const initials = customer.name
@@ -110,20 +131,42 @@ export default function CustomerProfile() {
               </div>
             </div>
 
+            <div className="text-left sm:text-right shrink-0">
+              <p className="text-xs text-ink-500">Outstanding</p>
+              <p className={`text-2xl font-bold ${outstanding > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                Rs {outstanding.toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <StatBox label="Invoiced" value={`Rs ${invoicedTotal.toLocaleString()}`} />
+            <StatBox label="Received" value={`Rs ${receivedTotal.toLocaleString()}`} tone="emerald" />
+            <StatBox label="Credit" value={`Rs ${outstanding.toLocaleString()}`} tone="amber" />
+          </div>
+
+          {/* ACTIONS */}
+          <div className="grid grid-cols-2 gap-3 mt-5">
+            <button
+              onClick={() => setPaymentModalOpen(true)}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-medium transition-colors"
+            >
+              <LuWallet size={17} /> Receive Payment
+            </button>
             <button
               onClick={() => setInvoiceModalOpen(true)}
-              className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors shrink-0"
+              className="flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors"
             >
               <LuPlus size={17} /> New Invoice
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <StatBox label="Total Orders" value={customer.orders} />
-            <StatBox label="Total Spend" value={`Rs ${Number(customer.total || 0).toLocaleString()}`} />
-            <StatBox label="Paid" value={`Rs ${paidTotal.toLocaleString()}`} tone="emerald" />
-            <StatBox label="Credit" value={`Rs ${udhaarTotal.toLocaleString()}`} tone="amber" />
-          </div>
+          <button
+            onClick={() => setBalanceModalOpen(true)}
+            className="w-full mt-3 py-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium transition-colors"
+          >
+            Add Previous Balance
+          </button>
         </div>
 
         {/* TABS */}
@@ -204,6 +247,27 @@ export default function CustomerProfile() {
         onClose={() => setViewingInvoice(null)}
         invoice={viewingInvoice}
         customer={customer}
+      />
+
+      <AmountEntryModal
+        open={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        onSave={handleReceivePayment}
+        title="Receive Payment"
+        subtitle={`From ${customer.name}`}
+        confirmLabel="Receive Payment"
+        tone="emerald"
+      />
+
+      <AmountEntryModal
+        open={balanceModalOpen}
+        onClose={() => setBalanceModalOpen(false)}
+        onSave={handleAddBalance}
+        title="Add Previous Balance"
+        subtitle="Record an existing credit balance for this customer"
+        amountLabel="Balance Amount (Rs)"
+        noteLabel="Note (optional)"
+        confirmLabel="Add Balance"
       />
     </Layout>
   )
