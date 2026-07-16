@@ -165,24 +165,24 @@ export default function CustomInvoiceModal({ open, onClose, onSubmit, initialDat
               </select>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-40 overflow-y-auto mb-4 pr-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto mb-4 pr-1">
               {filteredProducts.map((p) => (
-                <button
+                <div
                   key={p.id}
-                  onClick={() => addToCart(p)}
-                  className="relative text-left border border-slate-200 hover:border-primary-300 rounded-lg p-2.5 transition-colors"
+                  className="text-left border border-slate-200 hover:border-primary-300 rounded-lg p-2.5 transition-colors flex flex-col"
                 >
-                  <p className="text-xs font-medium text-ink-900 truncate pr-5">{p.name}</p>
-                  <p className="text-xs text-primary-700 font-semibold">Rs {p.price}</p>
-                  <span
-                    role="button"
-                    onClick={(e) => { e.stopPropagation(); setAmountProduct(p) }}
-                    title="Add by amount"
-                    className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-primary-50 hover:bg-primary-100 text-primary-700 flex items-center justify-center"
+                  <button type="button" onClick={() => addToCart(p)} className="text-left mb-2">
+                    <p className="text-xs font-medium text-ink-900 truncate">{p.name}</p>
+                    <p className="text-xs text-primary-700 font-semibold">Rs {p.price} / {p.unit}</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAmountProduct(p)}
+                    className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg py-1.5 transition-colors mt-auto"
                   >
-                    <LuBanknote size={11} />
-                  </span>
-                </button>
+                    <LuBanknote size={12} /> Add by Amount (Rs)
+                  </button>
+                </div>
               ))}
               {filteredProducts.length === 0 && (
                 <p className="col-span-full text-center text-xs text-ink-500 py-4">No products found.</p>

@@ -7,6 +7,17 @@ export default function InvoiceDetailModal({ open, onClose, invoice }) {
   const SHOP = shopInfo
   if (!invoice) return null
 
+  // Short label so the qty column stays narrow on an 80mm receipt (e.g. "0.5 L" instead of "0.5 Liter").
+  const unitAbbr = (unit) => {
+    if (!unit) return ''
+    const u = unit.toLowerCase()
+    if (u.startsWith('liter') || u === 'l') return 'L'
+    if (u.startsWith('kg') || u.startsWith('kilo')) return 'Kg'
+    if (u.startsWith('packet') || u.startsWith('pkt')) return 'Pkt'
+    if (u.startsWith('piece') || u.startsWith('pcs')) return 'Pcs'
+    return unit
+  }
+
   const handlePrint = () => {
     setTimeout(() => window.print(), 300)
   }
@@ -25,7 +36,7 @@ export default function InvoiceDetailModal({ open, onClose, invoice }) {
       `Type: ${invoice.source === 'custom' ? 'Custom' : 'POS Sale'} | ${invoice.paymentMode === 'paid' ? 'Paid' : 'Credit'}`,
       '--------------------------------',
       'SR  Item                Qty  Price   Total',
-      ...invoice.items.map((i, idx) => `${idx + 1}.  ${i.name} x${i.qty} @ Rs ${i.price} = Rs ${(i.price * i.qty).toLocaleString()}`),
+      ...invoice.items.map((i, idx) => `${idx + 1}.  ${i.name} x${i.qty}${unitAbbr(i.unit) ? ' ' + unitAbbr(i.unit) : ''} @ Rs ${i.price} = Rs ${(i.price * i.qty).toLocaleString()}`),
       '--------------------------------',
       `Subtotal: Rs ${invoice.subtotal.toLocaleString()}`,
       invoice.discountPercent ? `Discount: ${invoice.discountPercent}%` : null,
@@ -108,14 +119,14 @@ export default function InvoiceDetailModal({ open, onClose, invoice }) {
               <div className="flex text-[11px] font-semibold text-ink-600 mb-1">
                 <span className="w-5">SR</span>
                 <span className="flex-1">Item</span>
-                <span className="w-8 text-right">Qty</span>
+                <span className="w-14 text-right">Qty</span>
                 <span className="w-16 text-right">Total</span>
               </div>
               {invoice.items.map((item, idx) => (
                 <div key={item.productId} className="flex text-[12px] mb-0.5">
                   <span className="w-5">{idx + 1}.</span>
                   <span className="flex-1 truncate pr-1">{item.name}</span>
-                  <span className="w-8 text-right">{item.qty}</span>
+                  <span className="w-14 text-right">{item.qty} {unitAbbr(item.unit)}</span>
                   <span className="w-16 text-right">Rs {(item.price * item.qty).toLocaleString()}</span>
                 </div>
               ))}
