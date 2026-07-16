@@ -2,17 +2,27 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LuX } from 'react-icons/lu'
 
-export default function InvoiceModal({ open, onClose, onSave, defaultType = 'paid' }) {
+export default function InvoiceModal({ open, onClose, onSave, defaultType = 'paid', existingOutstanding = 0 }) {
   const [form, setForm] = useState({ description: '', amount: '', type: defaultType })
+  const [takingAdvance, setTakingAdvance] = useState(false)
+  const [advanceAmount, setAdvanceAmount] = useState('')
 
   useEffect(() => {
-    if (open) setForm({ description: '', amount: '', type: defaultType })
+    if (open) {
+      setForm({ description: '', amount: '', type: defaultType })
+      setTakingAdvance(false)
+      setAdvanceAmount('')
+    }
   }, [open, defaultType])
 
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.amount || !form.description) return
-    onSave({ ...form, amount: Number(form.amount) })
+    onSave({
+      ...form,
+      amount: Number(form.amount),
+      advanceAmount: form.type === 'udhaar' && takingAdvance ? Number(advanceAmount || 0) : 0,
+    })
   }
 
   return (
@@ -93,6 +103,61 @@ export default function InvoiceModal({ open, onClose, onSave, defaultType = 'pai
                   </button>
                 </div>
               </label>
+
+              {form.type === 'udhaar' && existingOutstanding > 0 && (
+                <div className="bg-rose-50/60 border border-rose-100 rounded-xl p-3 -mt-1 flex justify-between text-sm">
+                  <span className="text-ink-700">Existing credit balance</span>
+                  <span className="font-semibold text-rose-600">Rs {existingOutstanding.toLocaleString()}</span>
+                </div>
+              )}
+
+              {form.type === 'udhaar' && (
+                <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-4 -mt-1">
+                  <p className="text-sm font-medium text-ink-900 mb-2">Are you collecting an advance?</p>
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setTakingAdvance(true)}
+                      className={`py-2 rounded-lg text-sm font-medium border transition-colors ${
+                        takingAdvance ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-200 text-ink-700 hover:bg-white'
+                      }`}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setTakingAdvance(false); setAdvanceAmount('') }}
+                      className={`py-2 rounded-lg text-sm font-medium border transition-colors ${
+                        !takingAdvance ? 'bg-slate-700 border-slate-700 text-white' : 'border-slate-200 text-ink-700 hover:bg-white'
+                      }`}
+                    >
+                      No
+                    </button>
+                  </div>
+                  {takingAdvance && (
+                    <label className="flex flex-col gap-1.5">
+                      <span className="text-xs font-medium text-ink-500">Advance Amount (Rs)</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max={form.amount || undefined}
+                        value={advanceAmount}
+                        onChange={(e) => setAdvanceAmount(e.target.value)}
+                        placeholder="0"
+                        className="input"
+                      />
+                    </label>
+                  )}
+                  {Number(form.amount) > 0 && (
+                    <p className="text-xs text-ink-500 mt-2 pt-2 border-t border-amber-100">
+                      New total credit balance:{' '}
+                      <span className="font-semibold text-rose-600">
+                        Rs {Math.max(0, existingOutstanding + Number(form.amount) - Number(advanceAmount || 0)).toLocaleString()}
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-3 mt-2">
                 <button

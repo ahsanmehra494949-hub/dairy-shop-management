@@ -1,23 +1,22 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { LuX, LuPrinter, LuDownload } from 'react-icons/lu'
-
-// Shop details shown on the printed thermal receipt — keep in sync with Settings > Shop Information.
-const SHOP = {
-  name: 'Fresh Dairy Shop',
-  address: 'Main Market',
-  contact: '0300-0000000',
-}
+import { useShop } from '../context/ShopContext'
 
 export default function InvoiceDetailModal({ open, onClose, invoice }) {
+  const { shopInfo } = useShop()
+  const SHOP = shopInfo
   if (!invoice) return null
 
-  const handlePrint = () => window.print()
+  const handlePrint = () => {
+    setTimeout(() => window.print(), 300)
+  }
 
   const handleDownload = () => {
     const lines = [
       SHOP.name,
       SHOP.address,
       `Contact: ${SHOP.contact}`,
+      `Owner: ${SHOP.ownerName}${SHOP.ownerContact ? ' | ' + SHOP.ownerContact : ''}`,
       '--------------------------------',
       `Invoice #: ${invoice.number}`,
       `Date/Time: ${invoice.date} ${invoice.time || ''}`,
@@ -62,7 +61,7 @@ export default function InvoiceDetailModal({ open, onClose, invoice }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-            className="bg-white rounded-xl2 shadow-cardHover w-full max-w-[340px] mx-auto p-5 print:shadow-none print:rounded-none print:max-w-full"
+            className="print-container bg-white rounded-xl2 shadow-cardHover w-full max-w-[340px] mx-auto p-5 print:shadow-none print:rounded-none print:max-w-full print:w-full print:p-0 print:mx-0"
           >
             <div className="flex items-center justify-between mb-3 print:hidden">
               <h3 className="text-sm font-display font-semibold text-ink-900">Invoice Preview</h3>
@@ -71,12 +70,12 @@ export default function InvoiceDetailModal({ open, onClose, invoice }) {
               </button>
             </div>
 
-            {/* THERMAL RECEIPT */}
             <div className="font-mono text-[12.5px] leading-relaxed text-ink-900">
               <div className="text-center mb-2">
                 <p className="text-sm font-bold">{SHOP.name}</p>
                 <p className="text-[11px] text-ink-600">{SHOP.address}</p>
                 <p className="text-[11px] text-ink-600">Contact: {SHOP.contact}</p>
+                <p className="text-[11px] text-ink-600">Owner: {SHOP.ownerName}{SHOP.ownerContact ? ` (${SHOP.ownerContact})` : ''}</p>
               </div>
 
               <div className="border-t border-dashed border-ink-300 my-2" />

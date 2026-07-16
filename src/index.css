@@ -37,10 +37,6 @@
   box-sizing: border-box;
 }
 
-/* Tailwind v4 removed the default gray border color (now currentColor),
-   which made every plain `border` / `border-b` / `border-t` utility render
-   as a harsh black line. Reset it to a soft neutral so borders match the
-   rest of the UI instead of looking like stray black outlines. */
 @layer base {
   *,
   ::after,
@@ -101,5 +97,55 @@ h1, h2, h3, h4 {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* --- THERMAL RECEIPT PRINT STYLES ---
+   Sized for common 80mm thermal/POS printers (like the slip dukan/shops give).
+   NOTE: the old rule `body > *:not(.print-container)` only hides DIRECT children of
+   <body> (usually just the #root div). Since .print-container is nested deep INSIDE
+   #root, hiding #root also hides .print-container along with it — that's why nothing
+   ever printed. Fixed below using the visibility technique, which works no matter how
+   deeply .print-container is nested. */
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  html, body {
+    width: 80mm;
+  }
+
+  /* Hide everything on the page by default... */
+  body * {
+    visibility: hidden;
+  }
+
+  /* ...then reveal only the invoice being printed, and everything inside it. */
+  .print-container,
+  .print-container * {
+    visibility: visible;
+  }
+
+  .print-container {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    visibility: visible !important;
+    padding: 3mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+  }
+
+  /* Background graphics fix */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

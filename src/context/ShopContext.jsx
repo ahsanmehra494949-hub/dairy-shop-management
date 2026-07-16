@@ -19,6 +19,19 @@ export function ShopProvider({ children }) {
   const [invoices, setInvoices] = useState([]) // global invoice history: POS Sale + Custom
   const [invoiceCounter, setInvoiceCounter] = useState(1001)
 
+  // Shop + Owner info shown on printed invoices. Editable from Settings > Shop Information.
+  const [shopInfo, setShopInfo] = useState({
+    name: 'Fresh Dairy Shop',
+    address: 'Main Market',
+    contact: '0300-0000000',
+    ownerName: 'Shop Owner',
+    ownerContact: '',
+  })
+
+  const updateShopInfo = (updates) => {
+    setShopInfo((prev) => ({ ...prev, ...updates }))
+  }
+
   const addProduct = (product) => {
     setProducts((prev) => [{ id: Date.now(), icon: 'package', ...product }, ...prev])
   }
@@ -92,11 +105,16 @@ export function ShopProvider({ children }) {
 
   const getCustomer = (id) => customers.find((c) => String(c.id) === String(id))
 
-  // Adds an invoice (Paid or Credit) to a customer's own ledger, and updates their orders/total.
+  // Adds an invoice (Paid or Credit/udhaar) to a customer's own ledger, and updates their orders/total.
+  // `type: 'udhaar'` invoices track paidAmount separately so they can be settled partially, over time,
+  // possibly across several separate udhaar invoices for the same customer.
   const addInvoice = (customerId, invoice) => {
+    const amount = Number(invoice.amount || 0)
     const newInvoice = {
       id: Date.now(),
       date: formatDate(new Date()),
+      paidAmount: invoice.type === 'paid' ? amount : 0,
+      paymentHistory: [],
       ...invoice,
     }
     setCustomers((prev) =>
@@ -105,7 +123,7 @@ export function ShopProvider({ children }) {
           ? {
               ...c,
               orders: c.orders + 1,
-              total: c.total + Number(invoice.amount || 0),
+              total: c.total + amount,
               invoices: [newInvoice, ...(c.invoices || [])],
             }
           : c
@@ -114,11 +132,51 @@ export function ShopProvider({ children }) {
     return newInvoice
   }
 
-  // Records a payment received against a customer's outstanding balance.
-  const receivePayment = (customerId, amount, note = '') => {
-    const payment = { id: Date.now(), amount: Number(amount), note, date: formatDate(new Date()) }
+  // Records a payment received from a customer against their udhaar (credit).
+  // If `invoiceId` is given, the payment is applied to that specific udhaar invoice only (capped at
+  // its remaining balance). If not given, the amount is auto-applied oldest-first (FIFO) across all
+  // of that customer's open udhaar invoices — useful for a general "advance" payment.
+  const receivePayment = (customerId, amount, note = '', invoiceId = null) => {
+    let remainingToApply = Number(amount)
+    const paymentDate = formatDate(new Date())
+    const payment = { id: Date.now(), amount: Number(amount), note, date: paymentDate, invoiceId: invoiceId || null }
+
     setCustomers((prev) =>
-      prev.map((c) => (c.id === customerId ? { ...c, payments: [payment, ...(c.payments || [])] } : c))
+      prev.map((c) => {
+        if (c.id !== customerId) return c
+
+        let invoicesToApply = (c.invoices || [])
+        if (invoiceId) {
+          invoicesToApply = invoicesToApply.filter((inv) => inv.id === invoiceId)
+        } else {
+          // Oldest udhaar invoices first (list is stored newest-first, so reverse for FIFO).
+          invoicesToApply = invoicesToApply
+            .filter((inv) => inv.type === 'udhaar' && Number(inv.amount) - Number(inv.paidAmount || 0) > 0)
+            .slice()
+            .reverse()
+        }
+
+        const updatedInvoices = c.invoices.map((inv) => {
+          if (remainingToApply <= 0) return inv
+          const isTarget = invoicesToApply.some((t) => t.id === inv.id)
+          if (!isTarget) return inv
+          const due = Number(inv.amount) - Number(inv.paidAmount || 0)
+          if (due <= 0) return inv
+          const applied = Math.min(due, remainingToApply)
+          remainingToApply -= applied
+          return {
+            ...inv,
+            paidAmount: Number(inv.paidAmount || 0) + applied,
+            paymentHistory: [...(inv.paymentHistory || []), { date: paymentDate, amount: applied, note }],
+          }
+        })
+
+        return {
+          ...c,
+          invoices: updatedInvoices,
+          payments: [payment, ...(c.payments || [])],
+        }
+      })
     )
     return payment
   }
@@ -164,15 +222,17 @@ export function ShopProvider({ children }) {
     items.forEach((item) => adjustStock(item.productId, -item.qty))
 
     // If tied to a saved customer, also reflect it on their own profile ledger.
+    let customerInvoiceId = null
     if (customerId) {
-      addInvoice(customerId, {
+      const ledgerInvoice = addInvoice(customerId, {
         type: paymentMode === 'paid' ? 'paid' : 'udhaar',
         amount: total,
         description: items.map((i) => i.name).join(', ') || `${items.length} item(s)`,
       })
+      customerInvoiceId = ledgerInvoice.id
     }
 
-    return newInvoice
+    return { ...newInvoice, customerId, customerInvoiceId }
   }
 
   const updateInvoiceRecord = (id, updates) => {
@@ -208,6 +268,8 @@ export function ShopProvider({ children }) {
         createInvoiceRecord,
         updateInvoiceRecord,
         deleteInvoiceRecord,
+        shopInfo,
+        updateShopInfo,
       }}
     >
       {children}

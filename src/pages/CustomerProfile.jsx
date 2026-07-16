@@ -15,6 +15,7 @@ import Layout from '../components/Layout'
 import InvoiceModal from '../components/InvoiceModal'
 import InvoiceViewModal from '../components/InvoiceViewModal'
 import AmountEntryModal from '../components/AmountEntryModal'
+import ReceivePaymentModal from '../components/ReceivePaymentModal'
 import { useShop } from '../context/ShopContext'
 
 export default function CustomerProfile() {
@@ -46,27 +47,31 @@ export default function CustomerProfile() {
   }
 
   const invoices = customer.invoices || []
-  const payments = customer.payments || []
-  const paidInvoices = invoices.filter((i) => i.type === 'paid')
-  const udhaarInvoices = invoices.filter((i) => i.type === 'udhaar')
+  const remainingOf = (inv) => Number(inv.amount) - Number(inv.paidAmount || 0)
+  
+  const paidInvoices = invoices.filter((i) => i.type === 'paid' || (i.type === 'udhaar' && remainingOf(i) <= 0))
+  const udhaarInvoices = invoices.filter((i) => i.type === 'udhaar' && remainingOf(i) > 0)
   const activeInvoices = activeTab === 'paid' ? paidInvoices : udhaarInvoices
 
-  const paidTotal = paidInvoices.reduce((sum, i) => sum + Number(i.amount), 0)
-  const udhaarTotal = udhaarInvoices.reduce((sum, i) => sum + Number(i.amount), 0)
-  const paymentsTotal = payments.reduce((sum, p) => sum + Number(p.amount), 0)
+  const paidTotal = invoices.filter((i) => i.type === 'paid').reduce((sum, i) => sum + Number(i.amount), 0)
+  const udhaarTotal = invoices.filter((i) => i.type === 'udhaar').reduce((sum, i) => sum + Number(i.amount), 0)
+  const outstanding = udhaarInvoices.reduce((sum, i) => sum + remainingOf(i), 0)
+  const receivedTotal = paidTotal + (udhaarTotal - outstanding)
 
   const invoicedTotal = paidTotal + udhaarTotal
-  const receivedTotal = paidTotal + paymentsTotal
-  const outstanding = Math.max(0, udhaarTotal - paymentsTotal)
 
   const handleSaveInvoice = (form) => {
-    addInvoice(customer.id, form)
+    const { advanceAmount, ...rest } = form
+    const created = addInvoice(customer.id, rest)
+    if (rest.type === 'udhaar' && Number(advanceAmount) > 0) {
+      receivePayment(customer.id, Number(advanceAmount), 'Advance received at invoice creation', created.id)
+    }
     setInvoiceModalOpen(false)
     setActiveTab(form.type)
   }
 
-  const handleReceivePayment = ({ amount, note }) => {
-    receivePayment(customer.id, amount, note)
+  const handleReceivePayment = ({ amount, note, invoiceId }) => {
+    receivePayment(customer.id, amount, note, invoiceId)
     setPaymentModalOpen(false)
   }
 
@@ -93,7 +98,6 @@ export default function CustomerProfile() {
           <LuArrowLeft size={16} /> Back to Customers
         </button>
 
-        {/* PROFILE HEADER */}
         <div className="bg-white rounded-2xl border p-6">
           <div className="flex flex-col sm:flex-row sm:items-center gap-5 justify-between">
             <div className="flex items-center gap-4">
@@ -145,7 +149,6 @@ export default function CustomerProfile() {
             <StatBox label="Credit" value={`Rs ${outstanding.toLocaleString()}`} tone="amber" />
           </div>
 
-          {/* ACTIONS */}
           <div className="grid grid-cols-2 gap-3 mt-5">
             <button
               onClick={() => setPaymentModalOpen(true)}
@@ -169,7 +172,6 @@ export default function CustomerProfile() {
           </button>
         </div>
 
-        {/* TABS */}
         <div className="bg-white rounded-2xl border overflow-hidden">
           <div className="flex border-b">
             <TabButton
@@ -190,7 +192,7 @@ export default function CustomerProfile() {
                 <LuReceipt size={24} />
               </div>
               <p className="text-sm text-ink-500">
-                No {activeTab === 'paid' ? 'paid' : 'udhaar'} invoices yet for this customer.
+                No {activeTab === 'paid' ? 'paid' : 'credit'} invoices yet for this customer.
               </p>
             </div>
           ) : (
@@ -216,7 +218,19 @@ export default function CustomerProfile() {
                     >
                       <td className="p-4 font-medium text-ink-900">INV-{invoice.id}</td>
                       <td className="p-4 text-ink-700">{invoice.description}</td>
-                      <td className="p-4 font-medium text-ink-900">Rs {Number(invoice.amount).toLocaleString()}</td>
+                      <td className="p-4 font-medium text-ink-900">
+                        Rs {Number(invoice.amount).toLocaleString()}
+                        {invoice.type === 'udhaar' && Number(invoice.paidAmount || 0) > 0 && (
+                          <span className="block text-xs font-normal text-emerald-600">
+                            Rs {Number(invoice.paidAmount).toLocaleString()} already paid
+                          </span>
+                        )}
+                        {activeTab === 'udhaar' && (
+                          <span className="block text-xs font-normal text-rose-600">
+                            Remaining Rs {remainingOf(invoice).toLocaleString()}
+                          </span>
+                        )}
+                      </td>
                       <td className="p-4 text-ink-700">{invoice.date}</td>
                       <td className="p-4 text-right">
                         <button
@@ -240,6 +254,7 @@ export default function CustomerProfile() {
         onClose={() => setInvoiceModalOpen(false)}
         onSave={handleSaveInvoice}
         defaultType={activeTab}
+        existingOutstanding={outstanding}
       />
 
       <InvoiceViewModal
@@ -249,14 +264,11 @@ export default function CustomerProfile() {
         customer={customer}
       />
 
-      <AmountEntryModal
+      <ReceivePaymentModal
         open={paymentModalOpen}
         onClose={() => setPaymentModalOpen(false)}
         onSave={handleReceivePayment}
-        title="Receive Payment"
-        subtitle={`From ${customer.name}`}
-        confirmLabel="Receive Payment"
-        tone="emerald"
+        customer={customer}
       />
 
       <AmountEntryModal

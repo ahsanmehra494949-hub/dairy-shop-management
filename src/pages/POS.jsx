@@ -9,21 +9,24 @@ import {
   LuChevronRight,
   LuPlus,
   LuMinus,
+  LuBanknote,
 } from 'react-icons/lu'
 import Layout from '../components/Layout'
 import ProductIcon from '../components/ProductIcon'
 import POSCheckoutModal from '../components/POSCheckoutModal'
+import AmountQtyModal from '../components/AmountQtyModal'
 import { getStockStatus } from '../data/dummyData'
 import { useShop } from '../context/ShopContext'
 
 export default function POS() {
-  const { products, categories, invoices, createInvoiceRecord } = useShop()
+  const { products, categories, invoices, createInvoiceRecord, receivePayment } = useShop()
 
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
-  const [cart, setCart] = useState([]) // [{ productId, name, price, qty, unit }]
+  const [cart, setCart] = useState([])
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [successInvoice, setSuccessInvoice] = useState(null)
+  const [amountProduct, setAmountProduct] = useState(null)
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
@@ -64,8 +67,23 @@ export default function POS() {
 
   const clearCart = () => setCart([])
 
+  const addToCartByAmount = (product, qty) => {
+    setCart((prev) => {
+      const existing = prev.find((c) => c.productId === product.id)
+      if (existing) {
+        return prev.map((c) => (c.productId === product.id ? { ...c, qty: Math.round((c.qty + qty) * 100) / 100 } : c))
+      }
+      return [...prev, { productId: product.id, name: product.name, price: product.price, qty, unit: product.unit }]
+    })
+    setAmountProduct(null)
+  }
+
   const handleGenerateInvoice = (payload) => {
-    const invoice = createInvoiceRecord({ ...payload, source: 'pos', items: cart })
+    const { advanceAmount, ...rest } = payload
+    const invoice = createInvoiceRecord({ ...rest, source: 'pos', items: cart })
+    if (invoice.customerInvoiceId && Number(advanceAmount) > 0) {
+      receivePayment(invoice.customerId, Number(advanceAmount), 'Advance received at invoice creation', invoice.customerInvoiceId)
+    }
     setCart([])
     setCheckoutOpen(false)
     setSuccessInvoice(invoice)
@@ -79,7 +97,6 @@ export default function POS() {
           <p className="text-sm text-ink-500 mt-1">Build a cart and generate an invoice in a few taps</p>
         </div>
 
-        {/* STATS */}
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard icon={LuCircleCheck} tone="emerald" label="In Stock" value={inStockTotal} />
           <StatCard icon={LuShoppingCart} tone="primary" label="Today's Sales" value={todaysPosInvoices.length} />
@@ -87,7 +104,6 @@ export default function POS() {
           <StatCard icon={LuShoppingCart} tone="amber" label="Cart Total" value={`Rs ${cartTotal.toLocaleString()}`} />
         </div>
 
-        {/* SEARCH + CATEGORY */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <LuSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-300" size={17} />
@@ -110,7 +126,6 @@ export default function POS() {
           </select>
         </div>
 
-        {/* PRODUCT GRID */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredProducts.map((p) => {
             const status = getStockStatus(p.stock)
@@ -149,6 +164,15 @@ export default function POS() {
                 <p className="text-xs text-ink-500 mb-2">{p.category}</p>
                 <p className="text-primary-700 font-bold">Rs {p.price}</p>
                 <p className="text-xs text-ink-500">{p.stock} {p.unit} available</p>
+                {!disabled && (
+                  <span
+                    role="button"
+                    onClick={(e) => { e.stopPropagation(); setAmountProduct(p) }}
+                    className="mt-2 flex items-center justify-center gap-1.5 text-xs font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg py-1.5 transition-colors"
+                  >
+                    <LuBanknote size={13} /> Add by Amount
+                  </span>
+                )}
               </motion.button>
             )
           })}
@@ -161,7 +185,6 @@ export default function POS() {
         </div>
       </div>
 
-      {/* STICKY CART BAR */}
       {cart.length > 0 && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
@@ -222,7 +245,13 @@ export default function POS() {
         onSubmit={handleGenerateInvoice}
       />
 
-      {/* SUCCESS TOAST */}
+      <AmountQtyModal
+        open={!!amountProduct}
+        onClose={() => setAmountProduct(null)}
+        product={amountProduct}
+        onConfirm={addToCartByAmount}
+      />
+
       {successInvoice && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}

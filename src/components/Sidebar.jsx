@@ -42,7 +42,7 @@ export default function Sidebar({ collapsed, setCollapsed, mobileOpen, setMobile
       <motion.aside
         animate={{ width: collapsed ? 84 : 260 }}
         transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-        className="hidden lg:flex fixed left-0 top-0 h-screen bg-white border-r border-slate-100 shadow-sidebar z-30 flex-col"
+        className="hidden lg:flex fixed left-0 top-0 h-screen bg-white border-r border-slate-100 shadow-sidebar z-40 flex-col"
       >
         <SidebarContent collapsed={collapsed} />
         <button

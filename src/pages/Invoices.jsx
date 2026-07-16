@@ -8,6 +8,9 @@ import {
   LuDownload,
   LuPencil,
   LuTrash2,
+  LuChevronDown,
+  LuCheck,
+  LuFilter,
 } from 'react-icons/lu'
 import Layout from '../components/Layout'
 import CustomInvoiceModal from '../components/CustomInvoiceModal'
@@ -15,11 +18,18 @@ import InvoiceDetailModal from '../components/InvoiceDetailModal'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
 import { useShop } from '../context/ShopContext'
 
+const sourceOptions = [
+  { id: 'all', label: 'All Categories' },
+  { id: 'custom', label: 'Custom' },
+  { id: 'pos', label: 'POS Sale' },
+]
+
 export default function Invoices() {
-  const { invoices, createInvoiceRecord, updateInvoiceRecord, deleteInvoiceRecord } = useShop()
+  const { invoices, createInvoiceRecord, updateInvoiceRecord, deleteInvoiceRecord, receivePayment } = useShop()
 
   const [search, setSearch] = useState('')
   const [sourceFilter, setSourceFilter] = useState('all') // all | custom | pos
+  const [filterOpen, setFilterOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingInvoice, setEditingInvoice] = useState(null)
   const [viewingInvoice, setViewingInvoice] = useState(null)
@@ -48,10 +58,14 @@ export default function Invoices() {
   }
 
   const handleSubmit = (payload) => {
+    const { advanceAmount, ...rest } = payload
     if (editingInvoice) {
-      updateInvoiceRecord(editingInvoice.id, payload)
+      updateInvoiceRecord(editingInvoice.id, rest)
     } else {
-      createInvoiceRecord({ ...payload, source: 'custom' })
+      const created = createInvoiceRecord({ ...rest, source: 'custom' })
+      if (created.customerInvoiceId && Number(advanceAmount) > 0) {
+        receivePayment(created.customerId, Number(advanceAmount), 'Advance received at invoice creation', created.customerInvoiceId)
+      }
     }
     setModalOpen(false)
     setEditingInvoice(null)
@@ -92,25 +106,38 @@ export default function Invoices() {
           />
         </div>
 
-        {/* CATEGORY FILTER */}
-        <div className="flex flex-wrap gap-2">
-          {[
-            { id: 'all', label: 'All Categories' },
-            { id: 'custom', label: 'Custom' },
-            { id: 'pos', label: 'POS Sale' },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => setSourceFilter(f.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                sourceFilter === f.id
-                  ? 'bg-primary-600 border-primary-600 text-white'
-                  : 'border-slate-200 text-ink-700 hover:bg-slate-50'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        {/* CATEGORY FILTER — single dropdown */}
+        <div className="relative w-full sm:w-64">
+          <button
+            onClick={() => setFilterOpen((o) => !o)}
+            className="w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <LuFilter size={15} />
+              {sourceOptions.find((f) => f.id === sourceFilter)?.label}
+            </span>
+            <LuChevronDown size={16} className={`transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {filterOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setFilterOpen(false)} />
+              <div className="absolute z-20 mt-2 w-full bg-white rounded-xl shadow-cardHover border border-slate-100 overflow-hidden">
+                {sourceOptions.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => { setSourceFilter(f.id); setFilterOpen(false) }}
+                    className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-left transition-colors ${
+                      sourceFilter === f.id ? 'bg-primary-50 text-primary-700 font-medium' : 'text-ink-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {f.label}
+                    {sourceFilter === f.id && <LuCheck size={15} />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* NEW INVOICE */}

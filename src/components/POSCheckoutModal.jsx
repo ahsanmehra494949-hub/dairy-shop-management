@@ -14,6 +14,8 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
   const [selectedCustomerId, setSelectedCustomerId] = useState('')
   const [manual, setManual] = useState(emptyManual)
   const [paymentMode, setPaymentMode] = useState('paid')
+  const [takingAdvance, setTakingAdvance] = useState(false)
+  const [advanceAmount, setAdvanceAmount] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -23,6 +25,8 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
       setSelectedCustomerId('')
       setManual(emptyManual)
       setPaymentMode('paid')
+      setTakingAdvance(false)
+      setAdvanceAmount('')
     }
   }, [open])
 
@@ -35,6 +39,12 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
   const selectedCustomer = customers.find((c) => String(c.id) === String(selectedCustomerId))
   const canSubmit = cart.length > 0 && (selectedCustomer || manual.name.trim())
 
+  const existingOutstanding = (selectedCustomer?.invoices || []).reduce((sum, inv) => {
+    if (inv.type !== 'udhaar') return sum
+    const remaining = Number(inv.amount) - Number(inv.paidAmount || 0)
+    return sum + Math.max(0, remaining)
+  }, 0)
+
   const handleSubmit = () => {
     if (!canSubmit) return
     onSubmit({
@@ -44,6 +54,7 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
       taxPercent: Number(taxPercent || 0),
       total,
       paymentMode,
+      advanceAmount: paymentMode === 'credit' && takingAdvance ? Number(advanceAmount || 0) : 0,
       customerId: selectedCustomer ? selectedCustomer.id : null,
       customerName: selectedCustomer ? selectedCustomer.name : manual.name.trim() || 'Walk-in Customer',
       customerPhone: selectedCustomer ? selectedCustomer.phone : manual.phone,
@@ -85,7 +96,6 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
               </button>
             </div>
 
-            {/* CART SUMMARY */}
             <p className="text-xs font-semibold text-ink-500 tracking-wide mb-2">CART SUMMARY</p>
             <div className="bg-slate-50 rounded-xl p-3 mb-4 flex flex-col gap-3 max-h-40 overflow-y-auto">
               {cart.map((item) => (
@@ -117,7 +127,6 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
               {cart.length === 0 && <p className="text-sm text-ink-500 text-center py-2">Cart is empty.</p>}
             </div>
 
-            {/* DISCOUNT / TAX / DATE */}
             <div className="grid grid-cols-3 gap-3 mb-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-medium text-ink-500">Discount %</span>
@@ -145,7 +154,6 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
               </label>
             </div>
 
-            {/* TOTALS */}
             <div className="bg-primary-50/50 rounded-xl p-4 mb-5 space-y-1.5">
               <div className="flex justify-between text-sm text-ink-700">
                 <span>Subtotal</span>
@@ -169,7 +177,6 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
               </div>
             </div>
 
-            {/* CUSTOMER */}
             <p className="text-xs font-semibold text-ink-500 tracking-wide mb-2">CUSTOMER</p>
             <select
               value={selectedCustomerId}
@@ -208,7 +215,6 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
               </>
             )}
 
-            {/* PAYMENT MODE */}
             <p className="text-xs font-semibold text-ink-500 tracking-wide mt-4 mb-2">PAYMENT MODE</p>
             <div className="grid grid-cols-2 gap-3 mb-6">
               <button
@@ -251,6 +257,63 @@ export default function POSCheckoutModal({ open, onClose, cart, updateCartQty, o
                 </div>
               </button>
             </div>
+
+            {paymentMode === 'credit' && existingOutstanding > 0 && (
+              <div className="bg-rose-50/60 border border-rose-100 rounded-xl p-3 mb-3 -mt-3 flex justify-between text-sm">
+                <span className="text-ink-700">{selectedCustomer?.name || 'Customer'}'s existing credit balance</span>
+                <span className="font-semibold text-rose-600">Rs {existingOutstanding.toLocaleString()}</span>
+              </div>
+            )}
+
+            {paymentMode === 'credit' && (
+              <div className="bg-amber-50/60 border border-amber-100 rounded-xl p-4 mb-6 -mt-3">
+                <p className="text-sm font-medium text-ink-900 mb-2">Are you taking an advance payment?</p>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setTakingAdvance(true)}
+                    className={`py-2 rounded-lg text-sm font-medium border transition-colors ${
+                      takingAdvance ? 'bg-amber-500 border-amber-500 text-white' : 'border-slate-200 text-ink-700 hover:bg-white'
+                    }`}
+                  >
+                    Yes, partial advance
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setTakingAdvance(false); setAdvanceAmount('') }}
+                    className={`py-2 rounded-lg text-sm font-medium border transition-colors ${
+                      !takingAdvance ? 'bg-slate-700 border-slate-700 text-white' : 'border-slate-200 text-ink-700 hover:bg-white'
+                    }`}
+                  >
+                    No, full credit
+                  </button>
+                </div>
+                {takingAdvance && (
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-xs font-medium text-ink-500">Advance Amount (Rs)</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={total}
+                      value={advanceAmount}
+                      onChange={(e) => setAdvanceAmount(e.target.value)}
+                      placeholder="0"
+                      className="input"
+                      autoFocus
+                    />
+                    <span className="text-xs text-ink-500">
+                      Remaining balance: Rs {Math.max(0, total - Number(advanceAmount || 0)).toLocaleString()}
+                    </span>
+                  </label>
+                )}
+                <p className="text-xs text-ink-500 mt-2 pt-2 border-t border-amber-100">
+                  New total credit balance:{' '}
+                  <span className="font-semibold text-rose-600">
+                    Rs {Math.max(0, existingOutstanding + total - Number(takingAdvance ? advanceAmount || 0 : 0)).toLocaleString()}
+                  </span>
+                </p>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <button
