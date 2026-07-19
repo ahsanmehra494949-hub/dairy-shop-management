@@ -7,6 +7,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts'
 
@@ -72,8 +73,8 @@ export function ReportsTrendChart({ data }) {
   )
 }
 
-// Same data shape as ReportsTrendChart (label/amount), rendered as a single line —
-// sits under the bar chart on Reports so revenue/profit movement is easy to read at a glance.
+// Same data shape as ReportsTrendChart (label/amount) plus a profit field —
+// sits under the bar chart on Reports so revenue and profit movement are easy to read at a glance.
 export function ReportsRevenueLineChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
@@ -87,13 +88,24 @@ export function ReportsRevenueLineChart({ data }) {
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Revenue']} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(v, name) => [`Rs ${v.toLocaleString()}`, name]} />
+        <Legend wrapperStyle={{ fontSize: 12 }} />
         <Line
           type="monotone"
           dataKey="amount"
+          name="Revenue"
           stroke="url(#reportsLineGlow)"
           strokeWidth={3}
           dot={{ r: 4, fill: '#2158dd', strokeWidth: 0 }}
+          activeDot={{ r: 6 }}
+        />
+        <Line
+          type="monotone"
+          dataKey="profit"
+          name="Profit"
+          stroke="#22c55e"
+          strokeWidth={3}
+          dot={{ r: 4, fill: '#16a34a', strokeWidth: 0 }}
           activeDot={{ r: 6 }}
         />
       </LineChart>

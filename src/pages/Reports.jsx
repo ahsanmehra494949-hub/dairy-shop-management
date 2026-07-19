@@ -9,6 +9,7 @@ import {
   LuChevronDown,
   LuCheck,
   LuFilter,
+  LuHandCoins,
 } from "react-icons/lu";
 import Layout from "../components/Layout";
 import InvoiceViewModal from "../components/InvoiceViewModal";
@@ -46,6 +47,10 @@ function isInRange(dateStr, filter) {
   return true;
 }
 
+// No per-item cost data in the model, so profit is estimated as a margin off revenue
+// (same assumption behind the Dashboard's "Today's Profit" stat).
+const PROFIT_MARGIN = 0.25;
+
 // Builds the bar-chart series for the currently selected report period.
 function buildChartData(invoices, filter) {
   if (filter === "year") {
@@ -54,7 +59,7 @@ function buildChartData(invoices, filter) {
       const d = new Date(inv.date);
       if (!isNaN(d)) totals[MONTHS[d.getMonth()]] += Number(inv.amount);
     });
-    return MONTHS.map((m) => ({ label: m, amount: totals[m] }));
+    return MONTHS.map((m) => ({ label: m, amount: totals[m], profit: Math.round(totals[m] * PROFIT_MARGIN) }));
   }
 
   const totals = {};
@@ -64,7 +69,7 @@ function buildChartData(invoices, filter) {
   return Object.entries(totals)
     .map(([label, amount]) => ({ label, amount, _t: new Date(label).getTime() }))
     .sort((a, b) => a._t - b._t)
-    .map(({ label, amount }) => ({ label, amount }));
+    .map(({ label, amount }) => ({ label, amount, profit: Math.round(amount * PROFIT_MARGIN) }));
 }
 
 export default function Reports() {
@@ -90,6 +95,7 @@ export default function Reports() {
   const totalSales = filteredInvoices.reduce((sum, i) => sum + Number(i.amount), 0);
   const paidTotal = filteredInvoices.filter((i) => i.type === "paid").reduce((sum, i) => sum + Number(i.amount), 0);
   const udhaarTotal = filteredInvoices.filter((i) => i.type === "udhaar").reduce((sum, i) => sum + Number(i.amount), 0);
+  const profitTotal = Math.round(totalSales * PROFIT_MARGIN);
 
   const activeLabel = FILTERS.find((f) => f.id === filter)?.label;
 
@@ -140,8 +146,9 @@ export default function Reports() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
           <Card title="Total Sales" value={`Rs ${totalSales.toLocaleString()}`} icon={LuReceipt} />
+          <Card title="Profit" value={`Rs ${profitTotal.toLocaleString()}`} icon={LuHandCoins} />
           <Card title="Paid" value={`Rs ${paidTotal.toLocaleString()}`} icon={LuTrendingUp} />
           <Card title="Invoices" value={filteredInvoices.length} icon={LuFileChartColumn} />
           <Card title="Credit" value={`Rs ${udhaarTotal.toLocaleString()}`} icon={LuDollarSign} />
