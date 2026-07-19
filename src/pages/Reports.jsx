@@ -6,6 +6,9 @@ import {
   LuReceipt,
   LuDollarSign,
   LuChartColumn,
+  LuChevronDown,
+  LuCheck,
+  LuFilter,
 } from "react-icons/lu";
 import Layout from "../components/Layout";
 import InvoiceViewModal from "../components/InvoiceViewModal";
@@ -67,6 +70,7 @@ function buildChartData(invoices, filter) {
 export default function Reports() {
   const { customers } = useShop();
   const [filter, setFilter] = useState("month");
+  const [periodFilterOpen, setPeriodFilterOpen] = useState(false);
   const [viewingInvoice, setViewingInvoice] = useState(null);
 
   // Flatten every customer's invoices into one list, tagging the customer info.
@@ -98,19 +102,41 @@ export default function Reports() {
             <p className="text-sm text-ink-500 mt-1">View sales, profit and invoice reports</p>
           </div>
 
-          {/* Period tabs live right under the page title */}
-          <div className="flex gap-1.5 bg-white border p-1 rounded-xl w-fit">
-            {FILTERS.map((f) => (
+          {/* Period filter — same dropdown pattern used on Invoices/Inventory */}
+          <div className="w-full sm:w-48">
+            <p className="text-xs font-medium text-ink-500 mb-1.5 px-1">View by</p>
+            <div className="relative">
               <button
-                key={f.id}
-                onClick={() => setFilter(f.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === f.id ? "bg-primary-600 text-white" : "text-ink-500 hover:text-ink-900"
-                }`}
+                onClick={() => setPeriodFilterOpen((o) => !o)}
+                className="w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors"
               >
-                {f.label}
+                <span className="flex items-center gap-2">
+                  <LuFilter size={15} />
+                  {activeLabel}
+                </span>
+                <LuChevronDown size={16} className={`transition-transform ${periodFilterOpen ? "rotate-180" : ""}`} />
               </button>
-            ))}
+
+              {periodFilterOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setPeriodFilterOpen(false)} />
+                  <div className="absolute z-20 mt-2 w-full bg-white rounded-xl shadow-cardHover border border-slate-100 overflow-hidden">
+                    {FILTERS.map((f) => (
+                      <button
+                        key={f.id}
+                        onClick={() => { setFilter(f.id); setPeriodFilterOpen(false) }}
+                        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-left transition-colors ${
+                          filter === f.id ? "bg-primary-50 text-primary-700 font-medium" : "text-ink-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {f.label}
+                        {filter === f.id && <LuCheck size={15} />}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
