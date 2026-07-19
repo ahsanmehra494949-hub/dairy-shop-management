@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { LuSearch, LuPlus, LuPencil, LuTrash2, LuPackagePlus } from 'react-icons/lu'
+import { LuSearch, LuPlus, LuPencil, LuTrash2, LuPackagePlus, LuChevronDown, LuCheck, LuFilter } from 'react-icons/lu'
 import Layout from '../components/Layout'
 import ProductModal from '../components/ProductModal'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
@@ -10,6 +10,13 @@ import { EmptyState } from '../components/ProductsExtras'
 import { getStockStatus } from '../data/dummyData'
 import { useShop } from '../context/ShopContext'
 
+const stockOptions = [
+  { id: 'All', label: 'All' },
+  { id: 'In Stock', label: 'In Stock' },
+  { id: 'Low Stock', label: 'Low Stock' },
+  { id: 'Out of Stock', label: 'Out of Stock' },
+]
+
 export default function Inventory() {
   const { products, addProduct, updateProduct, deleteProduct, adjustStock, categories } = useShop()
   const location = useLocation()
@@ -18,6 +25,7 @@ export default function Inventory() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const [stockFilter, setStockFilter] = useState('All')
+  const [stockFilterOpen, setStockFilterOpen] = useState(false)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
@@ -106,21 +114,38 @@ export default function Inventory() {
           </button>
         </div>
 
-        {/* Stock status filter — same name is used for the active filter pill */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          {['All', 'In Stock', 'Low Stock', 'Out of Stock'].map((tier) => (
-            <button
-              key={tier}
-              onClick={() => setStockFilter(tier)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium border transition-colors ${
-                stockFilter === tier
-                  ? 'bg-primary-600 border-primary-600 text-white'
-                  : 'border-slate-200 text-ink-700 hover:bg-slate-50'
-              }`}
-            >
-              {tier}
-            </button>
-          ))}
+        {/* Stock status filter — single dropdown, same pattern as the Invoices category filter */}
+        <div className="relative w-full sm:w-64 mb-5">
+          <button
+            onClick={() => setStockFilterOpen((o) => !o)}
+            className="w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <LuFilter size={15} />
+              {stockOptions.find((f) => f.id === stockFilter)?.label}
+            </span>
+            <LuChevronDown size={16} className={`transition-transform ${stockFilterOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {stockFilterOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setStockFilterOpen(false)} />
+              <div className="absolute z-20 mt-2 w-full bg-white rounded-xl shadow-cardHover border border-slate-100 overflow-hidden">
+                {stockOptions.map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => { setStockFilter(f.id); setStockFilterOpen(false) }}
+                    className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-left transition-colors ${
+                      stockFilter === f.id ? 'bg-primary-50 text-primary-700 font-medium' : 'text-ink-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    {f.label}
+                    {stockFilter === f.id && <LuCheck size={15} />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {paginated.length === 0 ? (

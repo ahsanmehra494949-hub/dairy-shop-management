@@ -9,7 +9,7 @@ import {
 } from "react-icons/lu";
 import Layout from "../components/Layout";
 import InvoiceViewModal from "../components/InvoiceViewModal";
-import { ReportsTrendChart } from "../components/Charts";
+import { ReportsTrendChart, ReportsRevenueLineChart } from "../components/Charts";
 import { useShop } from "../context/ShopContext";
 
 const FILTERS = [
@@ -140,6 +140,28 @@ export default function Reports() {
             </div>
           ) : (
             <ReportsTrendChart data={chartData} />
+          )}
+        </motion.div>
+
+        {/* REVENUE/PROFIT LINE — sits right under the bar chart above */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
+          className="bg-white rounded-xl2 p-5 shadow-card border border-slate-50"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <LuTrendingUp size={18} className="text-primary-600" />
+            <h3 className="font-semibold text-ink-900">Revenue Trend</h3>
+          </div>
+          <p className="text-xs text-ink-500 mb-2">Profit &amp; revenue movement for the selected {filter} view</p>
+
+          {chartData.length === 0 ? (
+            <div className="h-[180px] flex items-center justify-center text-sm text-ink-500">
+              No invoice data for this period.
+            </div>
+          ) : (
+            <ReportsRevenueLineChart data={chartData} />
           )}
         </motion.div>
 
