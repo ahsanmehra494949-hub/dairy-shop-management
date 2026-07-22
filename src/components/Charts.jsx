@@ -18,6 +18,9 @@ const tooltipStyle = {
   fontSize: 13,
 }
 
+// Shows both Sales and Profit as separate lines. `data` items must have
+// shape { label, sales, profit } — Dashboard swaps `data` based on the
+// selected day/week/month/year filter.
 export function SalesOverviewChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={280}>
@@ -29,9 +32,16 @@ export function SalesOverviewChart({ data }) {
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-        <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+        <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Sales']} />
+        <Tooltip
+          contentStyle={tooltipStyle}
+          formatter={(v, name) => [`Rs ${v.toLocaleString()}`, name === 'sales' ? 'Sales' : 'Profit']}
+        />
+        <Legend
+          formatter={(value) => (value === 'sales' ? 'Sales' : 'Profit')}
+          wrapperStyle={{ fontSize: 12, color: '#64748b' }}
+        />
         <Line
           type="monotone"
           dataKey="sales"
@@ -40,21 +50,15 @@ export function SalesOverviewChart({ data }) {
           dot={{ r: 4, fill: '#2158dd', strokeWidth: 0 }}
           activeDot={{ r: 6 }}
         />
+        <Line
+          type="monotone"
+          dataKey="profit"
+          stroke="#22c55e"
+          strokeWidth={3}
+          dot={{ r: 4, fill: '#16a34a', strokeWidth: 0 }}
+          activeDot={{ r: 6 }}
+        />
       </LineChart>
-    </ResponsiveContainer>
-  )
-}
-
-export function WeeklySalesChart({ data }) {
-  return (
-    <ResponsiveContainer width="100%" height={280}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: 4, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-        <XAxis dataKey="week" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
-        <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Sales']} />
-        <Bar dataKey="sales" fill="#589cff" radius={[8, 8, 0, 0]} />
-      </BarChart>
     </ResponsiveContainer>
   )
 }
@@ -73,8 +77,8 @@ export function ReportsTrendChart({ data }) {
   )
 }
 
-// Same data shape as ReportsTrendChart (label/amount) plus a profit field —
-// sits under the bar chart on Reports so revenue and profit movement are easy to read at a glance.
+// Same data shape as ReportsTrendChart (label/amount), rendered as a single line —
+// sits under the bar chart on Reports so revenue/profit movement is easy to read at a glance.
 export function ReportsRevenueLineChart({ data }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
@@ -88,24 +92,13 @@ export function ReportsRevenueLineChart({ data }) {
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={56} />
-        <Tooltip contentStyle={tooltipStyle} formatter={(v, name) => [`Rs ${v.toLocaleString()}`, name]} />
-        <Legend wrapperStyle={{ fontSize: 12 }} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`Rs ${v.toLocaleString()}`, 'Revenue']} />
         <Line
           type="monotone"
           dataKey="amount"
-          name="Revenue"
           stroke="url(#reportsLineGlow)"
           strokeWidth={3}
           dot={{ r: 4, fill: '#2158dd', strokeWidth: 0 }}
-          activeDot={{ r: 6 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="profit"
-          name="Profit"
-          stroke="#22c55e"
-          strokeWidth={3}
-          dot={{ r: 4, fill: '#16a34a', strokeWidth: 0 }}
           activeDot={{ r: 6 }}
         />
       </LineChart>

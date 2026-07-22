@@ -7,22 +7,41 @@ export const summaryStats = {
   lowStockProducts: 7,
 }
 
-export const salesOverview = [
-  { day: 'Mon', sales: 32000 },
-  { day: 'Tue', sales: 41000 },
-  { day: 'Wed', sales: 38500 },
-  { day: 'Thu', sales: 45200 },
-  { day: 'Fri', sales: 51000 },
-  { day: 'Sat', sales: 62300 },
-  { day: 'Sun', sales: 48250 },
-]
-
-export const weeklySales = [
-  { week: 'Week 1', sales: 210000 },
-  { week: 'Week 2', sales: 245000 },
-  { week: 'Week 3', sales: 198000 },
-  { week: 'Week 4', sales: 267500 },
-]
+// Sales Overview data grouped by filter period — each entry has both
+// sales and profit so the dashboard chart can plot them together.
+export const salesOverviewByPeriod = {
+  day: [
+    { label: 'Mon', sales: 32000, profit: 8200 },
+    { label: 'Tue', sales: 41000, profit: 10500 },
+    { label: 'Wed', sales: 38500, profit: 9600 },
+    { label: 'Thu', sales: 45200, profit: 11800 },
+    { label: 'Fri', sales: 51000, profit: 13400 },
+    { label: 'Sat', sales: 62300, profit: 16900 },
+    { label: 'Sun', sales: 48250, profit: 12680 },
+  ],
+  week: [
+    { label: 'Week 1', sales: 210000, profit: 54600 },
+    { label: 'Week 2', sales: 245000, profit: 63700 },
+    { label: 'Week 3', sales: 198000, profit: 49500 },
+    { label: 'Week 4', sales: 267500, profit: 71800 },
+  ],
+  month: [
+    { label: 'Jan', sales: 780000, profit: 198000 },
+    { label: 'Feb', sales: 820000, profit: 209000 },
+    { label: 'Mar', sales: 865000, profit: 224000 },
+    { label: 'Apr', sales: 910000, profit: 236000 },
+    { label: 'May', sales: 875000, profit: 221000 },
+    { label: 'Jun', sales: 940000, profit: 248000 },
+    { label: 'Jul', sales: 920500, profit: 241000 },
+  ],
+  year: [
+    { label: '2022', sales: 8200000, profit: 2050000 },
+    { label: '2023', sales: 9450000, profit: 2410000 },
+    { label: '2024', sales: 10680000, profit: 2790000 },
+    { label: '2025', sales: 11920000, profit: 3120000 },
+    { label: '2026', sales: 6540000, profit: 1730000 },
+  ],
+}
 
 export const recentSales = [
   { invoiceId: 'INV-1042', customer: 'Ahsan Raza', product: 'Full Cream Milk', qty: 5, amount: 750, date: '07 Jul 2026', status: 'Paid' },
